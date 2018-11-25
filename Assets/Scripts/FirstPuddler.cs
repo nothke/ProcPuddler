@@ -128,29 +128,41 @@ public class FirstPuddler : MonoBehaviour
             // order by height
             queue = queue.OrderBy(c => H(c)).ToList();
 
+            List<Coord> passed = new List<Coord>();
+            passed.Add(min);
+
+            float saddleHeight = 0;
+
             while (queue.Count != 0)
             {
-                var nei = queue[0];
+                var next = queue[0];
                 queue.RemoveAt(0);
 
-                var neineis = Neighbors(nei);
+                passed.Add(next);
 
-                foreach (var neinei in neineis)
+                var nextNeighbors = Neighbors(next);
+
+                bool isSaddle = false;
+
+                // Check 
+                foreach (var nextNeighbor in nextNeighbors)
                 {
-                    if (taken.Contains(neinei)) continue;
+                    if (taken.Contains(nextNeighbor)) continue;
 
-                    taken.Add(neinei);
+                    taken.Add(nextNeighbor);
 
-                    if (H(neinei) < H(nei))
+                    if (H(nextNeighbor) < H(next))
                     {
                         // SADDLE!!
-                        Line(neinei, nei, Color.red, 1);
+                        isSaddle = true;
+                        saddleHeight = H(next);
+                        Line(nextNeighbor, next, Color.red, 1);
                         goto Bail;
                     }
                     else
                     {
-                        queue.Add(neinei);
-                        Line(neinei, nei, Color.yellow, 1);
+                        queue.Add(nextNeighbor);
+                        Line(nextNeighbor, next, Color.yellow, 1);
                     }
 
                     yield return null;
@@ -162,19 +174,12 @@ public class FirstPuddler : MonoBehaviour
 
             Bail:
 
-            yield return null;
-
-            /*
-            // Expand neighbors
-            var expanded = Expand(neis);
-
-            foreach (var expand in expanded)
+            foreach (var c in passed)
             {
+                Ray(c, 1, Color.green, 1);
+            }
 
-
-                Line(min, expand, Color.yellow, 1);
-                yield return null;
-            }*/
+            yield return null;
         }
 
 
