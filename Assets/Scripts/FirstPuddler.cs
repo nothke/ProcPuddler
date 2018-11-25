@@ -15,7 +15,7 @@ public class FirstPuddler : MonoBehaviour
         StartCoroutine(Co());
     }
 
-    const int size = 32;
+    const int size = 128;
     bool[,] filled;
 
     float H(Coord c)
@@ -31,6 +31,11 @@ public class FirstPuddler : MonoBehaviour
     bool Within(Coord c)
     {
         return c.x >= 0 && c.x < size && c.y >= 0 && c.y < size;
+    }
+
+    bool OnEdge(Coord c)
+    {
+        return !(c.x > 0 && c.x < size - 1 && c.y > 0 && c.y < size - 1);
     }
 
     List<Coord> Neighbors(Coord c)
@@ -81,8 +86,12 @@ public class FirstPuddler : MonoBehaviour
         {
             for (int y = 0; y < size; y++)
             {
-                heights[x, y] = Mathf.PerlinNoise(x * 0.123f, y * 0.123f) * 6;
-                //heights[x, y] += Mathf.PerlinNoise(x * 0.312f, y * 0.3243f);
+                heights[x, y] = Mathf.PerlinNoise(x * 0.123f, y * 0.123f) * 10;
+                heights[x, y] += Mathf.PerlinNoise(x * 0.04312f, y * 0.043243f) * 20;
+
+                //heights[x, y] += Mathf.PerlinNoise(x * 0.312f, y * 0.3243f) * 20;
+
+
             }
         }
 
@@ -115,6 +124,12 @@ public class FirstPuddler : MonoBehaviour
                 }
             }
         }
+
+        minima = minima.OrderBy(c => H(c)).ToList();
+
+        List<List<Coord>> allCollected = new List<List<Coord>>();
+
+        int skipct = 0;
 
         foreach (var min in minima)
         {
@@ -151,38 +166,69 @@ public class FirstPuddler : MonoBehaviour
 
                     taken.Add(nextNeighbor);
 
-                    if (H(nextNeighbor) < H(next))
+                    isSaddle = H(nextNeighbor) < H(next) || OnEdge(next);
+
+                    if (isSaddle)
                     {
-                        // SADDLE!!
-                        isSaddle = true;
-                        saddleHeight = H(next);
-                        Line(nextNeighbor, next, Color.red, 1);
-                        goto Bail;
+                        // check if already exists
+                        bool exists = false;
+
+                        foreach (var collected in allCollected)
+                        {
+                            if (collected.Contains(next))
+                            {
+                                taken.UnionWith(collected);
+                                exists = true;
+                                break;
+                            }
+                        }
+
+                        if (!exists)
+                        {
+                            // SADDLE!!
+                            isSaddle = true;
+                            saddleHeight = H(next);
+                            Line(nextNeighbor, next, Color.red, 1);
+                            goto Bail;
+                        }
+
                     }
-                    else
+                    else // if not saddle
                     {
                         queue.Add(nextNeighbor);
                         Line(nextNeighbor, next, Color.yellow, 1);
                     }
 
-                    yield return null;
+                    //yield return null;
                 }
 
-                yield return null;
+                skipct++;
+                if (skipct > 25)
+                {
+                    yield return null;
+                    skipct = 0;
+                }
+
                 queue = queue.OrderBy(c => H(c)).ToList();
             }
 
             Bail:
 
+            allCollected.Add(passed);
+
             foreach (var c in passed)
             {
                 Ray(c, 1, Color.green, 1);
+
+                // modify height
+                heights[c.x, c.y] = saddleHeight;
+                filled[c.x, c.y] = true;
             }
 
             yield return null;
         }
 
-
+        // OLD
 
         List<Coord> saddles = new List<Coord>();
 
