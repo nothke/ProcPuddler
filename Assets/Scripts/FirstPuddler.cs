@@ -64,8 +64,8 @@ public class FirstPuddler : MonoBehaviour
         {
             for (int y = 0; y < size; y++)
             {
-                heights[x, y] = Mathf.PerlinNoise(x * 0.232f, y * 0.232f);
-                heights[x, y] += Mathf.PerlinNoise(x * 0.312f, y * 0.3243f);
+                heights[x, y] = Mathf.PerlinNoise(x * 0.232f, y * 0.232f) * 2;
+                //heights[x, y] += Mathf.PerlinNoise(x * 0.312f, y * 0.3243f);
             }
         }
 
@@ -79,15 +79,22 @@ public class FirstPuddler : MonoBehaviour
                 int highers = 0;
 
                 float h = heights[x, y];
-                if (h <= heights[x + 1, y]) highers++;
-                if (h <= heights[x - 1, y]) highers++;
-                if (h <= heights[x, y + 1]) highers++;
-                if (h <= heights[x, y - 1]) highers++;
 
-                if (highers == 4)
+                var c = new Coord(x, y);
+                var neis = Neighbors(c);
+
+                foreach (var nei in neis)
+                {
+                    if (h <= H(nei)) highers++;
+                }
+
+                if (highers == 8)
                 {
                     filled[x, y] = true;
-                    minima.Add(new Coord(x, y));
+                    minima.Add(c);
+
+                    yield return null;
+                    Ray(c, 1, Color.red, 1);
                 }
             }
         }
@@ -176,6 +183,14 @@ public class FirstPuddler : MonoBehaviour
             Debug.DrawLine(P(c0), P(c1), c);
         else
             Debug.DrawLine(P(c0), P(c1), c, duration);
+    }
+
+    void Ray(Coord c0, float scale, Color c, float duration = 0)
+    {
+        if (duration == 0)
+            Debug.DrawRay(P(c0), Vector3.up * scale, c);
+        else
+            Debug.DrawRay(P(c0), Vector3.up * scale, c, duration);
     }
 
     private void Update()
