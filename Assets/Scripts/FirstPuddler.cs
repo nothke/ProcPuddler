@@ -81,7 +81,7 @@ public class FirstPuddler : MonoBehaviour
         {
             for (int y = 0; y < size; y++)
             {
-                heights[x, y] = Mathf.PerlinNoise(x * 0.232f, y * 0.232f) * 2;
+                heights[x, y] = Mathf.PerlinNoise(x * 0.123f, y * 0.123f) * 6;
                 //heights[x, y] += Mathf.PerlinNoise(x * 0.312f, y * 0.3243f);
             }
         }
@@ -119,48 +119,50 @@ public class FirstPuddler : MonoBehaviour
         foreach (var min in minima)
         {
             // Get the lowest point of the neighbors
-            var neis = Neighbors(min);
+            var queue = Neighbors(min);
 
             HashSet<Coord> taken = new HashSet<Coord>();
             taken.Add(min);
-            taken.UnionWith(neis);
-
-            /*
-            float lowest = 100;
-            Coord lc;
-            foreach (var nei in neis)
-            {
-                filled[nei.x, nei.y] = true;
-
-                if (H(nei) < lowest)
-                {
-                    lowest = H(nei);
-                }
-            }*/
+            taken.UnionWith(queue);
 
             // order by height
-            neis = neis.OrderBy(c => H(c)).ToList();
+            queue = queue.OrderBy(c => H(c)).ToList();
 
-
-            var nei = neis[0];
-
-            var neineis = Neighbors(nei);
-
-            foreach (var neinei in neineis)
+            while (queue.Count != 0)
             {
-                if (taken.Contains(neinei)) continue;
+                var nei = queue[0];
+                queue.RemoveAt(0);
 
-                if (H(neinei) < H(nei))
+                var neineis = Neighbors(nei);
+
+                foreach (var neinei in neineis)
                 {
-                    // SADDLE!!
-                    Line(neinei, nei, Color.red, 1);
+                    if (taken.Contains(neinei)) continue;
+
+                    taken.Add(neinei);
+
+                    if (H(neinei) < H(nei))
+                    {
+                        // SADDLE!!
+                        Line(neinei, nei, Color.red, 1);
+                        goto Bail;
+                    }
+                    else
+                    {
+                        queue.Add(neinei);
+                        Line(neinei, nei, Color.yellow, 1);
+                    }
+
+                    yield return null;
                 }
-                else
-                    Line(neinei, nei, Color.yellow, 1);
 
                 yield return null;
+                queue = queue.OrderBy(c => H(c)).ToList();
             }
 
+            Bail:
+
+            yield return null;
 
             /*
             // Expand neighbors
