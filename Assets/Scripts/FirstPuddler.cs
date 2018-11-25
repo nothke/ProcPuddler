@@ -101,28 +101,32 @@ public class FirstPuddler : MonoBehaviour
 
             float h = H(c);
 
+
             // Fill neighbors
             foreach (var nei in neis)
             {
+                Line(c, nei, Color.cyan, 0.2f);
+                yield return null;
+
                 filled[nei.x, nei.y] = true;
             }
 
-            /*
             foreach (var nei in neis)
             {
                 var neineis = Neighbors(nei);
 
                 filled[nei.x, nei.y] = true;
 
-                foreach (var neineis in collection)
+                foreach (var neinei in neineis)
                 {
-
+                    if (filled[neinei.x, neinei.y]) continue;
+                    if (H(nei) > H(neinei))
+                    {
+                        saddles.Add(nei);
+                        break;
+                    }
                 }
-
-                if (H(nei) < h) issaddle = true;
             }
-
-            if (issaddle) saddles.Add(c);*/
         }
 
         yield return null;
@@ -135,6 +139,12 @@ public class FirstPuddler : MonoBehaviour
                 Debug.DrawRay(new Vector3(min.x, 0, min.y), Vector3.up * 2, Color.red);
             }
 
+            // show saddles
+            foreach (var c in saddles)
+            {
+                Debug.DrawRay(new Vector3(c.x, 0, c.y), Vector3.up * 2, Color.yellow);
+            }
+
             // Debug fills
             for (int x = 0; x < size; x++)
             {
@@ -142,12 +152,25 @@ public class FirstPuddler : MonoBehaviour
                 {
                     if (!filled[x, y]) continue;
                     Vector3 p0 = new Vector3(x, heights[x, y], y);
-                    Debug.DrawRay(p0, Vector3.up * 5, Color.green);
+                    Debug.DrawRay(p0, -Vector3.up * 1, Color.green);
                 }
             }
 
             yield return null;
         }
+    }
+
+    Vector3 P(Coord c)
+    {
+        return new Vector3(c.x, heights[c.x, c.y], c.y);
+    }
+
+    void Line(Coord c0, Coord c1, Color c, float duration = 0)
+    {
+        if (duration == 0)
+            Debug.DrawLine(P(c0), P(c1), c);
+        else
+            Debug.DrawLine(P(c0), P(c1), c, duration);
     }
 
     private void Update()
