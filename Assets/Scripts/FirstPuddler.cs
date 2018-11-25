@@ -55,6 +55,21 @@ public class FirstPuddler : MonoBehaviour
         return neighbors;
     }
 
+    List<Coord> Expand(List<Coord> coords)
+    {
+        HashSet<Coord> expanded = new HashSet<Coord>();
+        expanded.UnionWith(coords);
+
+        foreach (var c in coords)
+        {
+            // get neighbors of each coord and add to hashset
+            var neis = Neighbors(c);
+            expanded.UnionWith(neis);
+        }
+
+        return new List<Coord>(expanded);
+    }
+
     IEnumerator Co()
     {
         // fill heights
@@ -98,6 +113,29 @@ public class FirstPuddler : MonoBehaviour
                 }
             }
         }
+
+        foreach (var min in minima)
+        {
+            // Get the lowest point of the neighbors
+            var neis = Neighbors(min);
+
+            float lowest = 100;
+            foreach (var nei in neis)
+            {
+                if (H(nei) < lowest) lowest = H(nei);
+            }
+
+            // Expand neighbors
+            var expanded = Expand(neis);
+
+            foreach (var expand in expanded)
+            {
+                Line(min, expand, Color.yellow, 1);
+                yield return null;
+            }
+        }
+
+
 
         List<Coord> saddles = new List<Coord>();
 
