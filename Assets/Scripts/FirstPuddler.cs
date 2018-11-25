@@ -91,12 +91,14 @@ public class FirstPuddler : MonoBehaviour
         {
             for (int y = 0; y < size; y++)
             {
-                heights[x, y] = Mathf.PerlinNoise(x * 0.123f, y * 0.123f) * 10;
-                heights[x, y] += Mathf.PerlinNoise(x * 0.04312f, y * 0.043243f) * 20;
+                //heights[x, y] = Mathf.PerlinNoise(x * 0.123f, y * 0.123f) * 10;
+                //heights[x, y] += Mathf.PerlinNoise(x * 0.04312f, y * 0.043243f) * 20;
 
-                //heights[x, y] += Mathf.PerlinNoise(x * 0.312f, y * 0.3243f) * 20;
+                heights[x, y] += Mathf.PerlinNoise(x * 0.312f, y * 0.3243f) * 3;
 
-
+                // These are very slow
+                //heights[x, y] = Mathf.Sin(x * 0.1234f) * 20;
+                //heights[x, y] = Mathf.Sin(x * 0.434f) * 20;
             }
         }
 
@@ -124,7 +126,7 @@ public class FirstPuddler : MonoBehaviour
                     filled[x, y] = true;
                     minima.Add(c);
 
-                    yield return null;
+                    //yield return null;
                     Ray(c, 1, Color.cyan, 10);
                 }
             }
@@ -257,23 +259,19 @@ public class FirstPuddler : MonoBehaviour
 
     void DrawGrid()
     {
-        for (int x = 0; x < size; x++)
+        for (int x = 0; x < size - 1; x++)
         {
-            for (int y = 0; y < size; y++)
+            for (int y = 0; y < size - 1; y++)
             {
                 Vector3 p0 = new Vector3(x, heights[x, y], y);
+                bool fill = filled[x, y];
+                Color c = fill ? Color.cyan : Color.white;
 
-                if (x < size - 1)
-                {
-                    Vector3 pr = new Vector3(x + 1, heights[x + 1, y], y);
-                    Debug.DrawLine(p0, pr);
-                }
+                Vector3 pr = new Vector3(x + 1, heights[x + 1, y], y);
+                Debug.DrawLine(p0, pr, c);
 
-                if (y < size - 1)
-                {
-                    Vector3 pf = new Vector3(x, heights[x, y + 1], y + 1);
-                    Debug.DrawLine(p0, pf);
-                }
+                Vector3 pf = new Vector3(x, heights[x, y + 1], y + 1);
+                Debug.DrawLine(p0, pf, c);
             }
         }
     }
