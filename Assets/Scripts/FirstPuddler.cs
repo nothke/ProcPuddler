@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using System.Linq;
+
 public class FirstPuddler : MonoBehaviour
 {
 
@@ -109,7 +111,7 @@ public class FirstPuddler : MonoBehaviour
                     minima.Add(c);
 
                     yield return null;
-                    Ray(c, 1, Color.red, 1);
+                    Ray(c, 1, Color.cyan, 10);
                 }
             }
         }
@@ -119,20 +121,58 @@ public class FirstPuddler : MonoBehaviour
             // Get the lowest point of the neighbors
             var neis = Neighbors(min);
 
+            HashSet<Coord> taken = new HashSet<Coord>();
+            taken.Add(min);
+            taken.UnionWith(neis);
+
+            /*
             float lowest = 100;
+            Coord lc;
             foreach (var nei in neis)
             {
-                if (H(nei) < lowest) lowest = H(nei);
+                filled[nei.x, nei.y] = true;
+
+                if (H(nei) < lowest)
+                {
+                    lowest = H(nei);
+                }
+            }*/
+
+            // order by height
+            neis = neis.OrderBy(c => H(c)).ToList();
+
+
+            var nei = neis[0];
+
+            var neineis = Neighbors(nei);
+
+            foreach (var neinei in neineis)
+            {
+                if (taken.Contains(neinei)) continue;
+
+                if (H(neinei) < H(nei))
+                {
+                    // SADDLE!!
+                    Line(neinei, nei, Color.red, 1);
+                }
+                else
+                    Line(neinei, nei, Color.yellow, 1);
+
+                yield return null;
             }
 
+
+            /*
             // Expand neighbors
             var expanded = Expand(neis);
 
             foreach (var expand in expanded)
             {
+
+
                 Line(min, expand, Color.yellow, 1);
                 yield return null;
-            }
+            }*/
         }
 
 
