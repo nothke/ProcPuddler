@@ -105,7 +105,7 @@ public class FirstPuddler : MonoBehaviour
             // Fill neighbors
             foreach (var nei in neis)
             {
-                Line(c, nei, Color.cyan, 0.2f);
+                Line(c, nei, Color.cyan, 2);
                 yield return null;
 
                 filled[nei.x, nei.y] = true;
@@ -120,8 +120,13 @@ public class FirstPuddler : MonoBehaviour
                 foreach (var neinei in neineis)
                 {
                     if (filled[neinei.x, neinei.y]) continue;
+
+                    Line(nei, neinei, Color.magenta, 2);
+                    yield return null;
+
                     if (H(nei) > H(neinei))
                     {
+                        Line(nei, neinei, Color.green, 2);
                         saddles.Add(nei);
                         break;
                     }
