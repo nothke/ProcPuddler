@@ -15,6 +15,11 @@ public class FirstPuddler : MonoBehaviour
         StartCoroutine(Co());
     }
 
+    private void Update()
+    {
+        DrawGrid();
+    }
+
     const int size = 128;
     bool[,] filled;
 
@@ -227,80 +232,6 @@ public class FirstPuddler : MonoBehaviour
 
             yield return null;
         }
-
-        // OLD
-
-        List<Coord> saddles = new List<Coord>();
-
-        foreach (var c in minima)
-        {
-            bool issaddle = false;
-            var neis = Neighbors(c);
-
-            float h = H(c);
-
-
-            // Fill neighbors
-            foreach (var nei in neis)
-            {
-                Line(c, nei, Color.cyan, 2);
-                yield return null;
-
-                filled[nei.x, nei.y] = true;
-            }
-
-            foreach (var nei in neis)
-            {
-                var neineis = Neighbors(nei);
-
-                filled[nei.x, nei.y] = true;
-
-                foreach (var neinei in neineis)
-                {
-                    if (filled[neinei.x, neinei.y]) continue;
-
-                    Line(nei, neinei, Color.magenta, 2);
-                    yield return null;
-
-                    if (H(nei) > H(neinei))
-                    {
-                        Line(nei, neinei, Color.green, 2);
-                        saddles.Add(nei);
-                        break;
-                    }
-                }
-            }
-        }
-
-        yield return null;
-
-        while (true)
-        {
-            // show minima
-            foreach (var min in minima)
-            {
-                Debug.DrawRay(new Vector3(min.x, 0, min.y), Vector3.up * 2, Color.red);
-            }
-
-            // show saddles
-            foreach (var c in saddles)
-            {
-                Debug.DrawRay(new Vector3(c.x, 0, c.y), Vector3.up * 2, Color.yellow);
-            }
-
-            // Debug fills
-            for (int x = 0; x < size; x++)
-            {
-                for (int y = 0; y < size; y++)
-                {
-                    if (!filled[x, y]) continue;
-                    Vector3 p0 = new Vector3(x, heights[x, y], y);
-                    Debug.DrawRay(p0, -Vector3.up * 1, Color.green);
-                }
-            }
-
-            yield return null;
-        }
     }
 
     Vector3 P(Coord c)
@@ -324,7 +255,7 @@ public class FirstPuddler : MonoBehaviour
             Debug.DrawRay(P(c0), Vector3.up * scale, c, duration);
     }
 
-    private void Update()
+    void DrawGrid()
     {
         for (int x = 0; x < size; x++)
         {
