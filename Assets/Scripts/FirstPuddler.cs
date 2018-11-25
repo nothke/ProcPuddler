@@ -28,7 +28,36 @@ public class FirstPuddler : MonoBehaviour
             }
         }
 
+        List<Coord> minima = new List<Coord>();
+
+        for (int x = 1; x < 31; x++)
+        {
+            for (int y = 1; y < 31; y++)
+            {
+                int highers = 0;
+
+                float h = heights[x, y];
+                if (h < heights[x + 1, y]) highers++;
+                if (h < heights[x - 1, y]) highers++;
+                if (h < heights[x, y + 1]) highers++;
+                if (h < heights[x, y - 1]) highers++;
+
+                if (highers == 4) minima.Add(new Coord(x, y));
+            }
+        }
+
         yield return null;
+
+        while (true)
+        {
+            // show minima
+            foreach (var min in minima)
+            {
+                Debug.DrawRay(new Vector3(min.x, 0, min.y), Vector3.up * 2, Color.red);
+            }
+
+            yield return null;
+        }
     }
 
     private void Update()
